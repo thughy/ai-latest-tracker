@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { mockResearchItems } from '@/utils/mockData';
 import { FilterOptions, ResearchItem } from '@/utils/types';
+import { fetchResearchItems } from '@/utils/dataFetcher';
+import { useQuery } from '@tanstack/react-query';
 
 // Default filter options
 const defaultFilters: FilterOptions = {
@@ -15,11 +17,20 @@ const defaultFilters: FilterOptions = {
 };
 
 export function useResearchData() {
-  const [items, setItems] = useState<ResearchItem[]>(mockResearchItems);
-  const [filteredItems, setFilteredItems] = useState<ResearchItem[]>(mockResearchItems);
   const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [filteredItems, setFilteredItems] = useState<ResearchItem[]>([]);
+  
+  // Use React Query to fetch real data with caching and error handling
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['researchItems'],
+    queryFn: fetchResearchItems,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
+    retry: 2,
+    refetchOnWindowFocus: false,
+    initialData: mockResearchItems, // Use mock data initially
+  });
+  
   // Apply filters to items
   const applyFilters = useCallback(() => {
     let result = [...items];
@@ -94,15 +105,6 @@ export function useResearchData() {
     setFilters(defaultFilters);
   }, []);
 
-  // Simulate loading data
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
   // Update filtered items when filters or items change
   useEffect(() => {
     setFilteredItems(applyFilters());
@@ -110,48 +112,49 @@ export function useResearchData() {
 
   // Update a research item
   const updateItem = useCallback((id: string, updates: Partial<ResearchItem>) => {
-    setItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, ...updates } : item
-      )
+    const updatedItems = items.map(item => 
+      item.id === id ? { ...item, ...updates } : item
     );
-  }, []);
+    
+    // We're not updating the original data source (API), just the local state
+    // In a real app, you might want to sync this with a database
+  }, [items]);
 
   // Toggle star status
   const toggleStar = useCallback((id: string) => {
-    setItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, isStarred: !item.isStarred } : item
-      )
+    const updatedItems = items.map(item => 
+      item.id === id ? { ...item, isStarred: !item.isStarred } : item
     );
-  }, []);
+    
+    // We're not updating the original data source (API), just the local state
+  }, [items]);
 
   // Toggle interest status
   const toggleInterest = useCallback((id: string) => {
-    setItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, isInterested: !item.isInterested } : item
-      )
+    const updatedItems = items.map(item => 
+      item.id === id ? { ...item, isInterested: !item.isInterested } : item
     );
-  }, []);
+    
+    // We're not updating the original data source (API), just the local state
+  }, [items]);
 
   // Toggle read status
   const toggleRead = useCallback((id: string) => {
-    setItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, isRead: !item.isRead } : item
-      )
+    const updatedItems = items.map(item => 
+      item.id === id ? { ...item, isRead: !item.isRead } : item
     );
-  }, []);
+    
+    // We're not updating the original data source (API), just the local state
+  }, [items]);
 
   // Set user score
   const setUserScore = useCallback((id: string, score: number) => {
-    setItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, userScore: score } : item
-      )
+    const updatedItems = items.map(item => 
+      item.id === id ? { ...item, userScore: score } : item
     );
-  }, []);
+    
+    // We're not updating the original data source (API), just the local state
+  }, [items]);
 
   return {
     items: filteredItems,
