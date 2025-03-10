@@ -30,15 +30,8 @@ export function useResearchData() {
     gcTime: 1000 * 60 * 60, // 1 hour
     retry: 1,
     refetchOnWindowFocus: false,
-    onSettled: (data, error) => {
-      if (error) {
-        console.error('Error fetching research data:', error);
-        toast({
-          title: "Error fetching data",
-          description: "Using fallback data. Please try again later.",
-          variant: "destructive",
-        });
-      } else if (data && data.length === 0) {
+    onSuccess: (data) => {
+      if (data && data.length === 0) {
         toast({
           title: "No data found",
           description: "No research items were found. Using fallback data.",
@@ -48,6 +41,14 @@ export function useResearchData() {
         console.log(`Fetched ${data.length} research items`);
       }
     },
+    onError: (error) => {
+      console.error('Error fetching research data:', error);
+      toast({
+        title: "Error fetching data",
+        description: "Using fallback data. Please try again later.",
+        variant: "destructive",
+      });
+    }
   });
   
   // Apply filters to items
