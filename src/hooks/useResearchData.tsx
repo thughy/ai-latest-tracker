@@ -4,6 +4,7 @@ import { mockResearchItems } from '@/utils/mockData';
 import { FilterOptions, ResearchItem } from '@/utils/types';
 import { fetchResearchItems } from '@/utils/dataFetcher';
 import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/components/ui/use-toast';
 
 // Default filter options
 const defaultFilters: FilterOptions = {
@@ -19,16 +20,34 @@ const defaultFilters: FilterOptions = {
 export function useResearchData() {
   const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
   const [filteredItems, setFilteredItems] = useState<ResearchItem[]>([]);
+  const { toast } = useToast();
   
   // Use React Query to fetch real data with caching and error handling
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, error, refetch } = useQuery({
     queryKey: ['researchItems'],
     queryFn: fetchResearchItems,
-    staleTime: 1000 * 60 * 15, // 15 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 60, // 1 hour
-    retry: 2,
+    retry: 1,
     refetchOnWindowFocus: false,
-    initialData: mockResearchItems, // Use mock data initially
+    onSettled: (data, error) => {
+      if (error) {
+        console.error('Error fetching research data:', error);
+        toast({
+          title: "Error fetching data",
+          description: "Using fallback data. Please try again later.",
+          variant: "destructive",
+        });
+      } else if (data && data.length === 0) {
+        toast({
+          title: "No data found",
+          description: "No research items were found. Using fallback data.",
+          variant: "destructive",
+        });
+      } else if (data && data.length > 0) {
+        console.log(`Fetched ${data.length} research items`);
+      }
+    },
   });
   
   // Apply filters to items
@@ -105,6 +124,15 @@ export function useResearchData() {
     setFilters(defaultFilters);
   }, []);
 
+  // Manual refetch function with toast notification
+  const refreshData = useCallback(() => {
+    toast({
+      title: "Refreshing data",
+      description: "Fetching the latest research items...",
+    });
+    refetch();
+  }, [refetch, toast]);
+
   // Update filtered items when filters or items change
   useEffect(() => {
     setFilteredItems(applyFilters());
@@ -112,16 +140,21 @@ export function useResearchData() {
 
   // Update a research item
   const updateItem = useCallback((id: string, updates: Partial<ResearchItem>) => {
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, ...updates } : item
     );
     
     // We're not updating the original data source (API), just the local state
-    // In a real app, you might want to sync this with a database
   }, [items]);
 
   // Toggle star status
   const toggleStar = useCallback((id: string) => {
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, isStarred: !item.isStarred } : item
     );
@@ -131,6 +164,9 @@ export function useResearchData() {
 
   // Toggle interest status
   const toggleInterest = useCallback((id: string) => {
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, isInterested: !item.isInterested } : item
     );
@@ -140,6 +176,9 @@ export function useResearchData() {
 
   // Toggle read status
   const toggleRead = useCallback((id: string) => {
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, isRead: !item.isRead } : item
     );
@@ -149,6 +188,9 @@ export function useResearchData() {
 
   // Set user score
   const setUserScore = useCallback((id: string, score: number) => {
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, userScore: score } : item
     );
@@ -160,8 +202,10 @@ export function useResearchData() {
     items: filteredItems,
     filters,
     isLoading,
+    error,
     updateFilters,
     resetFilters,
+    refreshData,
     updateItem,
     toggleStar,
     toggleInterest,

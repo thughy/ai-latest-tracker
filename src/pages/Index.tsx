@@ -6,15 +6,17 @@ import FilterBar from '@/components/FilterBar';
 import ResearchCard from '@/components/ResearchCard';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { BookOpen, ChevronUp } from 'lucide-react';
+import { BookOpen, ChevronUp, RefreshCw } from 'lucide-react';
 
 const Index = () => {
   const { 
     items, 
     filters, 
     isLoading, 
+    error,
     updateFilters, 
-    resetFilters, 
+    resetFilters,
+    refreshData,
     toggleStar, 
     toggleInterest, 
     toggleRead, 
@@ -73,6 +75,19 @@ const Index = () => {
               Track the latest advancements in AI from top research papers and GitHub repositories.
               Star, save, and organize the most relevant developments in one place.
             </p>
+            
+            {/* Refresh button */}
+            <div className="mt-4">
+              <Button 
+                onClick={refreshData}
+                disabled={isLoading}
+                variant="outline"
+                className="gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                {isLoading ? 'Refreshing...' : 'Refresh Data'}
+              </Button>
+            </div>
           </div>
           
           {/* Filters */}
@@ -90,6 +105,19 @@ const Index = () => {
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-[200px] rounded-lg loading-shimmer" />
                 ))}
+              </div>
+            ) : error ? (
+              // Error state
+              <div className="py-20 text-center animate-fade-in">
+                <div className="inline-flex rounded-full bg-red-100 p-6 mb-4">
+                  <BookOpen className="h-6 w-6 text-red-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Error Loading Data</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  There was an error fetching the latest research data. 
+                  Using fallback data instead.
+                </p>
+                <Button onClick={refreshData}>Try Again</Button>
               </div>
             ) : items.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 animate-scale-in">
