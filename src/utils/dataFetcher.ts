@@ -57,9 +57,27 @@ export const fetchArxivPapers = async (): Promise<ResearchItem[]> => {
         if (name) authors.push(name);
       }
       
-      // Get publication date
+      // Get publication date - FIX: Properly parse and format the date
       const published = entry.getElementsByTagName("published")[0]?.textContent || "";
-      const date = new Date(published).toISOString();
+      console.log(`Original arXiv date: ${published}`);
+      
+      // Ensure proper date parsing with explicit handling
+      let date: string;
+      try {
+        const publishedDate = new Date(published);
+        // Check if date is valid
+        if (isNaN(publishedDate.getTime())) {
+          console.warn(`Invalid date from arXiv: ${published}, using current date instead`);
+          date = new Date().toISOString();
+        } else {
+          date = publishedDate.toISOString();
+        }
+      } catch (error) {
+        console.error(`Error parsing arXiv date: ${published}`, error);
+        date = new Date().toISOString();
+      }
+      
+      console.log(`Parsed arXiv date: ${date}`);
       
       // Get paper link
       const links = entry.getElementsByTagName("link");
@@ -204,12 +222,34 @@ export const fetchGithubRepos = async (): Promise<ResearchItem[]> => {
         }
       });
       
+      // FIX: Properly parse and format the date
+      const updatedAt = repo.updated_at;
+      console.log(`Original GitHub date: ${updatedAt}`);
+      
+      // Ensure proper date parsing with explicit handling
+      let date: string;
+      try {
+        const updatedDate = new Date(updatedAt);
+        // Check if date is valid
+        if (isNaN(updatedDate.getTime())) {
+          console.warn(`Invalid date from GitHub: ${updatedAt}, using current date instead`);
+          date = new Date().toISOString();
+        } else {
+          date = updatedDate.toISOString();
+        }
+      } catch (error) {
+        console.error(`Error parsing GitHub date: ${updatedAt}`, error);
+        date = new Date().toISOString();
+      }
+      
+      console.log(`Parsed GitHub date: ${date}`);
+      
       items.push({
         id: `github-${repo.id}`,
         title: repo.name,
         description: repo.description || 'No description available',
         authors: [`GitHub: ${repo.full_name}`],
-        date: new Date(repo.updated_at).toISOString(),
+        date,
         source: 'github' as Source,
         url: repo.html_url,
         relevanceScore,

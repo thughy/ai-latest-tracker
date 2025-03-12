@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 interface ResearchCardProps {
   item: ResearchItem;
@@ -32,8 +32,19 @@ export function ResearchCard({
     setIsExpanded(prev => !prev);
   }, []);
   
-  // Format date
-  const formattedDate = format(new Date(item.date), 'MMM d, yyyy');
+  // Format date with better error handling
+  let formattedDate = 'Unknown date';
+  try {
+    const date = parseISO(item.date);
+    // Check if date is valid before formatting
+    if (!isNaN(date.getTime())) {
+      formattedDate = format(date, 'MMM d, yyyy');
+    } else {
+      console.warn(`Invalid date format for item: ${item.id}`, item.date);
+    }
+  } catch (error) {
+    console.error(`Error formatting date for item: ${item.id}`, error);
+  }
   
   // Handle star click
   const handleStarClick = useCallback((e: React.MouseEvent) => {
