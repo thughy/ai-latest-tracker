@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useResearchData } from '@/hooks/useResearchData';
-import Header from '@/components/Header';
+import { Header } from '@/components/Header';
 import FilterBar from '@/components/FilterBar';
 import ResearchCard from '@/components/ResearchCard';
 import { Button } from '@/components/ui/button';
