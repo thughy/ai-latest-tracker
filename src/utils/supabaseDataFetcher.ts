@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResearchItem, Source } from './types';
 import { mockResearchItems } from './mockData';
 import { fetchArxivPapers, fetchGithubRepos } from './dataFetcher';
+import { v4 as uuidv4 } from 'uuid';
 
 // Fetch research items from Supabase
 export const fetchResearchItemsFromSupabase = async (): Promise<ResearchItem[]> => {
@@ -49,9 +50,13 @@ export const fetchResearchItemsFromSupabase = async (): Promise<ResearchItem[]> 
 // Insert a single research item into Supabase
 export const insertResearchItem = async (item: ResearchItem): Promise<void> => {
   try {
+    // Generate a proper UUID instead of using the original ID
+    // which might not conform to Supabase's UUID format
+    const properUuid = uuidv4();
+    
     // Transform item to match database schema
     const dbItem = {
-      id: item.id,
+      id: properUuid,
       title: item.title,
       description: item.description,
       authors: item.authors,
