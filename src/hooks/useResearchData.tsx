@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { mockResearchItems } from '@/utils/mockData';
 import { FilterOptions, ResearchItem } from '@/utils/types';
 import { fetchResearchItems } from '@/utils/dataFetcher';
-import { updateResearchItem } from '@/utils/supabaseDataFetcher';
+import { updateResearchItem, refreshResearchData } from '@/utils/supabaseDataFetcher';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -137,6 +137,30 @@ export function useResearchData() {
     refetch();
   }, [refetch, toast]);
 
+  // Clear database and perform a fresh crawl
+  const crawlFreshData = useCallback(async () => {
+    toast({
+      title: "Crawling fresh data",
+      description: "Removing old data and fetching the latest research items. This may take a moment...",
+    });
+    
+    try {
+      await refreshResearchData();
+      refetch();
+      toast({
+        title: "Data refreshed",
+        description: "Successfully crawled and stored new research items with corrected date stamps.",
+      });
+    } catch (error) {
+      console.error('Error during fresh data crawl:', error);
+      toast({
+        title: "Crawl failed",
+        description: "There was an error refreshing the data. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }, [refetch, toast]);
+
   // Update filtered items when filters or items change
   useEffect(() => {
     setFilteredItems(applyFilters());
@@ -225,6 +249,7 @@ export function useResearchData() {
     updateFilters,
     resetFilters,
     refreshData,
+    crawlFreshData, // New function for fresh data crawl
     updateItem,
     toggleStar,
     toggleInterest,

@@ -121,6 +121,43 @@ export const updateResearchItem = async (id: string, updates: Partial<ResearchIt
   }
 };
 
+// Delete all research items from Supabase
+export const deleteAllResearchItems = async (): Promise<void> => {
+  try {
+    console.log('Deleting all research items from Supabase...');
+    
+    const { error } = await supabase
+      .from('research_items')
+      .delete()
+      .neq('id', 'no-match'); // This condition will match all rows
+    
+    if (error) {
+      console.error('Error deleting items from Supabase:', error);
+      throw error;
+    }
+    
+    console.log('Successfully deleted all research items');
+  } catch (error) {
+    console.error('Failed to delete items:', error);
+  }
+};
+
+// Refresh data by deleting all items and fetching new ones from APIs
+export const refreshResearchData = async (): Promise<ResearchItem[]> => {
+  try {
+    console.log('Refreshing research data...');
+    
+    // Delete all existing data
+    await deleteAllResearchItems();
+    
+    // Populate with fresh data from APIs
+    return await populateSupabaseWithAPIData();
+  } catch (error) {
+    console.error('Error refreshing research data:', error);
+    return [];
+  }
+};
+
 // Populate Supabase with data from APIs
 export const populateSupabaseWithAPIData = async (): Promise<ResearchItem[]> => {
   try {

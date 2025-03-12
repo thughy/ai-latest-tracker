@@ -1,65 +1,63 @@
 
-import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RotateCcw, RefreshCw } from 'lucide-react';
+import { useResearchData } from '@/hooks/useResearchData';
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isCrawling, setIsCrawling] = useState(false);
+  const { refreshData, crawlFreshData } = useResearchData();
   
-  // Add scroll event listener to change header style on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshData();
+    setTimeout(() => setIsRefreshing(false), 1000); // Visual feedback
+  };
+  
+  const handleCrawlFresh = async () => {
+    setIsCrawling(true);
+    await crawlFreshData();
+    setTimeout(() => setIsCrawling(false), 1000); // Visual feedback
+  };
+  
   return (
-    <header 
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-400 ease-apple px-6 py-4",
-        scrolled ? "bg-background/80 backdrop-blur-md shadow-sm" : "bg-transparent"
-      )}
-    >
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 bg-primary rounded-lg grid place-items-center overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/60"></div>
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              className="h-5 w-5 text-primary-foreground relative z-10"
-            >
-              <path d="M12 2v1"></path>
-              <path d="M12 21v1"></path>
-              <path d="M4.93 4.93l.71.71"></path>
-              <path d="M18.36 18.36l.71.71"></path>
-              <path d="M2 12h1"></path>
-              <path d="M21 12h1"></path>
-              <path d="M4.93 19.07l.71-.71"></path>
-              <path d="M18.36 5.64l.71-.71"></path>
-              <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
-            </svg>
+    <header className="border-b border-border/60 bg-background/80 backdrop-blur-md sticky top-0 z-10 w-full">
+      <div className="container flex items-center justify-between p-4">
+        <div className="flex items-center gap-2">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary-foreground grid place-items-center">
+            <span className="text-lg font-semibold text-white">AI</span>
           </div>
-          <h1 className="text-lg font-semibold tracking-tight">
-            AI Frontier <span className="text-primary font-normal">Tracker</span>
-          </h1>
+          <div>
+            <h1 className="text-xl font-semibold">AI Research Feed</h1>
+            <p className="text-xs text-muted-foreground">Track the latest in AI research</p>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <div className="text-sm text-muted-foreground">
-            Tracking the latest developments in AI
-          </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="gap-1"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </Button>
+          
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={handleCrawlFresh}
+            disabled={isCrawling}
+            className="gap-1"
+          >
+            <RotateCcw className={`h-4 w-4 ${isCrawling ? 'animate-spin' : ''}`} />
+            <span>{isCrawling ? 'Crawling...' : 'Crawl Fresh Data'}</span>
+          </Button>
         </div>
       </div>
     </header>
   );
 }
-
-export default Header;
