@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { mockResearchItems } from '@/utils/mockData';
 import { FilterOptions, ResearchItem } from '@/utils/types';
 import { fetchResearchItems } from '@/utils/dataFetcher';
+import { updateResearchItem } from '@/utils/supabaseDataFetcher';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -142,64 +143,79 @@ export function useResearchData() {
   }, [filters, items, applyFilters]);
 
   // Update a research item
-  const updateItem = useCallback((id: string, updates: Partial<ResearchItem>) => {
-    const item = items.find(item => item.id === id);
-    if (!item) return;
-    
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, ...updates } : item
-    );
-    
-    // We're not updating the original data source (API), just the local state
-  }, [items]);
+  const updateItem = useCallback(async (id: string, updates: Partial<ResearchItem>) => {
+    try {
+      // Update in Supabase
+      await updateResearchItem(id, updates);
+      
+      // Refresh the data to get the latest changes
+      refetch();
+      
+      toast({
+        title: "Item updated",
+        description: "The research item has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating item:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update the research item. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [refetch, toast]);
 
   // Toggle star status
-  const toggleStar = useCallback((id: string) => {
+  const toggleStar = useCallback(async (id: string) => {
     const item = items.find(item => item.id === id);
     if (!item) return;
     
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, isStarred: !item.isStarred } : item
-    );
-    
-    // We're not updating the original data source (API), just the local state
-  }, [items]);
+    try {
+      await updateResearchItem(id, { isStarred: !item.isStarred });
+      refetch();
+    } catch (error) {
+      console.error('Error toggling star status:', error);
+    }
+  }, [items, refetch]);
 
   // Toggle interest status
-  const toggleInterest = useCallback((id: string) => {
+  const toggleInterest = useCallback(async (id: string) => {
     const item = items.find(item => item.id === id);
     if (!item) return;
     
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, isInterested: !item.isInterested } : item
-    );
-    
-    // We're not updating the original data source (API), just the local state
-  }, [items]);
+    try {
+      await updateResearchItem(id, { isInterested: !item.isInterested });
+      refetch();
+    } catch (error) {
+      console.error('Error toggling interest status:', error);
+    }
+  }, [items, refetch]);
 
   // Toggle read status
-  const toggleRead = useCallback((id: string) => {
+  const toggleRead = useCallback(async (id: string) => {
     const item = items.find(item => item.id === id);
     if (!item) return;
     
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, isRead: !item.isRead } : item
-    );
-    
-    // We're not updating the original data source (API), just the local state
-  }, [items]);
+    try {
+      await updateResearchItem(id, { isRead: !item.isRead });
+      refetch();
+    } catch (error) {
+      console.error('Error toggling read status:', error);
+    }
+  }, [items, refetch]);
 
   // Set user score
-  const setUserScore = useCallback((id: string, score: number) => {
+  const setUserScore = useCallback(async (id: string, score: number) => {
     const item = items.find(item => item.id === id);
     if (!item) return;
     
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, userScore: score } : item
-    );
-    
-    // We're not updating the original data source (API), just the local state
-  }, [items]);
+    try {
+      await updateResearchItem(id, { userScore: score });
+      refetch();
+    } catch (error) {
+      console.error('Error setting user score:', error);
+    }
+  }, [items, refetch]);
 
   return {
     items: filteredItems,

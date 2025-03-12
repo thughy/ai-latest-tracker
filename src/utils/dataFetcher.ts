@@ -1,6 +1,6 @@
-
 import { ResearchItem, Source } from './types';
 import { mockResearchItems } from './mockData';
+import { fetchResearchItemsFromSupabase } from './supabaseDataFetcher';
 
 // Fetch arXiv papers related to AI and agents
 export const fetchArxivPapers = async (): Promise<ResearchItem[]> => {
@@ -228,30 +228,20 @@ export const fetchGithubRepos = async (): Promise<ResearchItem[]> => {
   }
 };
 
-// Fetch all research items (combine arXiv and GitHub)
+// Fetch all research items (from Supabase)
 export const fetchResearchItems = async (): Promise<ResearchItem[]> => {
   try {
-    console.log('Fetching research items from all sources...');
+    console.log('Fetching research items from Supabase...');
     
-    const [arxivItems, githubItems] = await Promise.all([
-      fetchArxivPapers(),
-      fetchGithubRepos()
-    ]);
+    const items = await fetchResearchItemsFromSupabase();
     
-    console.log(`Total items fetched - arXiv: ${arxivItems.length}, GitHub: ${githubItems.length}`);
-    
-    // Combine and sort by date (newest first)
-    const allItems = [...arxivItems, ...githubItems];
-    
-    if (allItems.length === 0) {
-      console.warn('No items fetched from any source, falling back to mock data');
+    if (items.length === 0) {
+      console.warn('No items fetched from Supabase, falling back to mock data');
       return mockResearchItems;
     }
     
-    allItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    console.log(`Returning ${allItems.length} combined research items`);
-    return allItems;
+    console.log(`Returning ${items.length} research items from Supabase`);
+    return items;
   } catch (error) {
     console.error('Error fetching research items:', error);
     console.warn('Falling back to mock data due to error');
