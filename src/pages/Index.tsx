@@ -6,7 +6,8 @@ import FilterBar from '@/components/FilterBar';
 import ResearchCard from '@/components/ResearchCard';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { BookOpen, ChevronUp, RefreshCw } from 'lucide-react';
+import { BookOpen, ChevronUp, RefreshCw, BarChart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const { 
@@ -76,8 +77,8 @@ const Index = () => {
               Star, save, and organize the most relevant developments in one place.
             </p>
             
-            {/* Refresh button */}
-            <div className="mt-4">
+            {/* Refresh and Stats buttons */}
+            <div className="mt-4 flex justify-center gap-2">
               <Button 
                 onClick={refreshData}
                 disabled={isLoading}
@@ -86,6 +87,17 @@ const Index = () => {
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 {isLoading ? 'Refreshing...' : 'Refresh Data'}
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="gap-2"
+                asChild
+              >
+                <Link to="/stats">
+                  <BarChart className="h-4 w-4" />
+                  Stats Dashboard
+                </Link>
               </Button>
             </div>
           </div>

@@ -9,6 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alembic_version: {
+        Row: {
+          version_num: string
+        }
+        Insert: {
+          version_num: string
+        }
+        Update: {
+          version_num?: string
+        }
+        Relationships: []
+      }
+      articles: {
+        Row: {
+          author: string | null
+          content_summary: string | null
+          created_at: string | null
+          github_stars: number | null
+          github_stars_growth_10d: number | null
+          github_stars_growth_1d: number | null
+          github_stars_growth_3d: number | null
+          github_stars_updated_at: string | null
+          id: number
+          not_interested: number | null
+          not_interested_manually_edited: boolean | null
+          processed: number | null
+          published_date: string
+          read_count: number | null
+          read_manually_edited: boolean | null
+          relevance_score: number | null
+          score_manually_edited: boolean | null
+          source: string
+          star_manually_edited: boolean | null
+          starred: number | null
+          title: string
+          updated_at: string | null
+          url: string
+          user_rating: number | null
+          user_rating_manually_edited: boolean | null
+        }
+        Insert: {
+          author?: string | null
+          content_summary?: string | null
+          created_at?: string | null
+          github_stars?: number | null
+          github_stars_growth_10d?: number | null
+          github_stars_growth_1d?: number | null
+          github_stars_growth_3d?: number | null
+          github_stars_updated_at?: string | null
+          id?: number
+          not_interested?: number | null
+          not_interested_manually_edited?: boolean | null
+          processed?: number | null
+          published_date: string
+          read_count?: number | null
+          read_manually_edited?: boolean | null
+          relevance_score?: number | null
+          score_manually_edited?: boolean | null
+          source: string
+          star_manually_edited?: boolean | null
+          starred?: number | null
+          title: string
+          updated_at?: string | null
+          url: string
+          user_rating?: number | null
+          user_rating_manually_edited?: boolean | null
+        }
+        Update: {
+          author?: string | null
+          content_summary?: string | null
+          created_at?: string | null
+          github_stars?: number | null
+          github_stars_growth_10d?: number | null
+          github_stars_growth_1d?: number | null
+          github_stars_growth_3d?: number | null
+          github_stars_updated_at?: string | null
+          id?: number
+          not_interested?: number | null
+          not_interested_manually_edited?: boolean | null
+          processed?: number | null
+          published_date?: string
+          read_count?: number | null
+          read_manually_edited?: boolean | null
+          relevance_score?: number | null
+          score_manually_edited?: boolean | null
+          source?: string
+          star_manually_edited?: boolean | null
+          starred?: number | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+          user_rating?: number | null
+          user_rating_manually_edited?: boolean | null
+        }
+        Relationships: []
+      }
       research_items: {
         Row: {
           authors: string[]
